@@ -1,11 +1,11 @@
 import React , {useState , useEffect} from 'react'
 import {  useNavigate } from 'react-router-dom';
 import styled from "styled-components"
-// import loader from "../asset/loader.gif"
+import loader from "../assets/loader.gif"
 import {ToastContainer , toast} from "react-toastify"
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-// import { setAvatarRoute } from "../utils/APIRouter";
+import { setAvatarRoute } from "../utils/APIRoutes";
 import { Buffer } from 'buffer';
 
 
@@ -24,6 +24,32 @@ import { Buffer } from 'buffer';
     draggable: true,
     theme: "dark",
   }
+
+  const setProfilePicture = async () => {
+    if (selectedAvatar === undefined) {
+      toast.error("Please select an avatar", toastOptions);
+    } else {
+      const user = await JSON.parse(
+        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+      );
+
+      const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
+        image: avatars[selectedAvatar],
+      });
+
+      if (data.isSet) {
+        user.isAvatarImageSet = true;
+        user.avatarImage = data.image;
+        localStorage.setItem(
+          process.env.REACT_APP_LOCALHOST_KEY,
+          JSON.stringify(user)
+        );
+        navigate("/");
+      } else {
+        toast.error("Error setting avatar. Please try again.", toastOptions);
+      }
+    }
+  };
 
 
   useEffect(() => {
@@ -48,7 +74,11 @@ import { Buffer } from 'buffer';
   }, []);
   return (
     <div>
-    <Container> 
+   {
+    isLoading ? <Container>
+     <img src={loader} alt="loader" className='loader'/>
+    </Container> : (
+      <Container> 
      <div className="title-container">
      <h1>
        PICK an AVATAR WHATEVER YOU WANT 
@@ -71,7 +101,11 @@ import { Buffer } from 'buffer';
         })
       }
      </div>
+     <button className='submit-btn'onClick={setProfilePicture}> Set as Profile Picture</button>
     </Container>
+    )
+   }
+    
     <ToastContainer />
     </div>
     
@@ -121,7 +155,7 @@ const Container = styled.div`
     }
   }
   .submit-btn {
-    background-color: #4e0eff;
+    background-color: #997af0;
     color: white;
     padding: 1rem 2rem;
     border: none;
