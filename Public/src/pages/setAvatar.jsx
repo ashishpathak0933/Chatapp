@@ -1,5 +1,5 @@
 import React , {useState , useEffect} from 'react'
-import {  useNavigate } from 'react-router-dom';
+import { useNavigate  } from 'react-router-dom';
 import styled from "styled-components"
 import loader from "../assets/loader.gif"
 import {ToastContainer , toast} from "react-toastify"
@@ -24,24 +24,36 @@ import { Buffer } from 'buffer';
     draggable: true,
     theme: "dark",
   }
+  useEffect(() => {
+    const checkLocalStorage = async () => {
+      if (!localStorage.getItem("chat-app-user")) {
+        navigate("/login");
+      }
+    };
+  
+    checkLocalStorage();
+  }, []);
+
+  
 
   const setProfilePicture = async () => {
     if (selectedAvatar === undefined) {
       toast.error("Please select an avatar", toastOptions);
     } else {
       const user = await JSON.parse(
-        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+        localStorage.getItem("chat-app-user")
       );
 
       const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
         image: avatars[selectedAvatar],
       });
+     
 
       if (data.isSet) {
         user.isAvatarImageSet = true;
         user.avatarImage = data.image;
         localStorage.setItem(
-          process.env.REACT_APP_LOCALHOST_KEY,
+          "chat-app-user",
           JSON.stringify(user)
         );
         navigate("/");
@@ -50,6 +62,7 @@ import { Buffer } from 'buffer';
       }
     }
   };
+
 
 
   useEffect(() => {
