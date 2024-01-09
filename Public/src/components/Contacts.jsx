@@ -22,9 +22,9 @@ const Contacts = ({contacts , currentUser , changeChat}) => {
   
 
   return (
-    <React.Fragment>
+    <>
 
-    {currentUserImage && currentUserImage && (
+    {currentUserImage && currentUserName && (
       <Container>
         <div className="brand">
           <img src={Logo} alt="logo" />
@@ -66,7 +66,7 @@ const Contacts = ({contacts , currentUser , changeChat}) => {
         </div>
       </Container>
     )}
-        </React.Fragment>
+        </>
      
 
     

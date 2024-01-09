@@ -15,7 +15,7 @@ const Welcome = ({currentUser}) => {
   )
 }
 
- export default Welcome
+ 
 const Container = styled.div`
    display: flex;
    justify-content: center;
@@ -29,3 +29,6 @@ const Container = styled.div`
      color: #4e0eff;
    }
 `;
+
+
+export default Welcome
