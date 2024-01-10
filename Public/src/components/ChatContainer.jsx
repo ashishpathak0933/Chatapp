@@ -5,7 +5,7 @@ import ChatInput from './ChatInput'
 import Messages from './Messages'
 const ChatContainer = ({currentChat}) => {
 const handleSendMsg = async(msg) =>{
-
+alert(msg)
 };
   return (
 
