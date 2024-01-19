@@ -1,15 +1,74 @@
-import React from 'react'
+import React, { useState, useEffect , useRef} from "react";
 import styled from 'styled-components'  
 import Logout from "./Logout"
 import ChatInput from './ChatInput'
-import Messages from './Messages'
-const ChatContainer = ({currentChat}) => {
-const handleSendMsg = async(msg) =>{
-alert(msg)
+import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import { getAllMessagesRoute, sendMessageRoute } from '../utils/APIRoutes'
+
+
+const ChatContainer = ({currentChat , currentUser , socket}) => {
+
+  const [messages, setMessage] = useState([]);
+  const scrollRef = useRef();
+  const [arrivalMessage, setArrivalMessage] = useState(null);
+
+  useEffect(() => {
+    if(currentChat){
+    const fetchData = async () => {
+
+      try {
+        const response = await axios.post(getAllMessagesRoute, {
+          from: currentUser._id,
+          to: currentChat._id,
+        });
+        setMessage(response.data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+  
+    fetchData();  // Call the async function
+  }
+  }, [currentChat]) ;
+  
+
+  const handleSendMsg = async(msg) =>{
+  await axios.post(sendMessageRoute, {
+   from : currentUser._id,
+   to: currentChat._id,
+   message : msg, 
+   
+  });
+  socket.current.emit("send-msg",{
+    to: currentChat._id,
+    from : currentUser._id,
+    message : msg,
+  });
+  const msgs = [...messages];
+    msgs.push({fromSelf: true, message : msg});
+  setMessage(msgs)
 };
+useEffect(() => {
+  if (socket.current) {
+    socket.current.on("msg-recieve", (msg) => {
+      setArrivalMessage({ fromSelf: false, message: msg });
+    });
+  }
+}, []);
+ 
+useEffect(() => {
+  arrivalMessage && setMessage((prev) => [...prev, arrivalMessage]);
+}, [arrivalMessage]);
+
+useEffect(() => {
+  scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [messages]);
+
+
   return (
 
-    <React.Fragment>
+    <>
     { currentChat && (
     <Container>
       <div className="chat-header">
@@ -28,13 +87,35 @@ alert(msg)
       </div>
       < Logout />
       </div>
-      < Messages />
+      <div className="chat-messages">
+      {
+       messages.map((message)=>{
+        return(
+          <div ref={scrollRef} key={uuidv4()}> 
+            <div className={`message ${
+                  message.fromSelf ? "sended" : "recieved"
+                }`}>
+                  <div className="content">
+                    <p>{message.message}</p>
+                  </div>
+                </div>
+          </div>
+        )
+       } )
+      }
+ 
+
+
+       
+
+
+      </div>
       < ChatInput handleSendMsg = {handleSendMsg }/>
     </Container>
    
   )
 }
-</React.Fragment>
+</>
 
 )}
 
